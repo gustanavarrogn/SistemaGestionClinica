@@ -13,7 +13,7 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if (!in_array(auth()->user()->role, $roles)) {
+        if (!in_array(auth()->user()->rol, $roles)) {
             abort(403, 'No tiene permiso para acceder a esta sección.');
         }
 
