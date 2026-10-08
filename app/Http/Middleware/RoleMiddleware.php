@@ -14,7 +14,7 @@ class RoleMiddleware
         }
 
         if (!in_array(auth()->user()->rol, $roles)) {
-            abort(403, 'No tiene permiso para acceder a esta sección.');
+            abort(403, 'No tiene permiso para acceder a esta seccion.');
         }
 
         return $next($request);
