@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class PatientController extends Controller
 {
@@ -33,7 +34,7 @@ class PatientController extends Controller
         $datos = $request->validate([
             'nombre'                => 'required|string|max:120',
             'telefono'              => 'nullable|string|max:30',
-            'email'                 => 'nullable|email|max:255',
+            'email'                 => 'nullable|email|max:255|unique:patients,email',
             'birth_date'            => 'nullable|date|before:today',
             'tipo_de_sangre'        => 'nullable|string|max:3',
             'alergias'              => 'nullable|string',
@@ -44,6 +45,11 @@ class PatientController extends Controller
             'email.email'       => 'El correo no tiene un formato valido.',
         ]);
 
+        // La recepción solo registra datos de contacto, no puede enviar datos clínicos.
+        if (auth()->user()->rol !== 'admin') {
+            unset($datos['tipo_de_sangre'], $datos['alergias'], $datos['enfermedades_cronicas']);
+        }
+
         Patient::create($datos);
 
         return redirect()->route('pacientes.index')
@@ -52,11 +58,15 @@ class PatientController extends Controller
 
     public function show($id)
     {
-        $paciente = Patient::with(['appointments' => function ($consulta) {
-            $consulta->orderBy('fecha', 'desc')->orderBy('hora', 'desc');
-        }, 'appointments.doctor'])->findOrFail($id);
-
         $verClinico = auth()->user()->rol === 'admin';
+        $paciente = Patient::findOrFail($id);
+
+        // El historial se obtiene únicamente para el rol que puede ver información clínica.
+        if ($verClinico) {
+            $paciente->load(['appointments' => function ($consulta) {
+                $consulta->orderBy('fecha', 'desc')->orderBy('hora', 'desc');
+            }, 'appointments.doctor']);
+        }
 
         return view('pacientes.show', compact('paciente', 'verClinico'));
     }
@@ -64,7 +74,7 @@ class PatientController extends Controller
     public function edit($id)
     {
         $paciente = Patient::findOrFail($id);
-        $verClinico = auth()->user()->rol === 'admin';
+        $verClinico = auth()->user()->isManagementAdmin();
 
         return view('pacientes.edit', compact('paciente', 'verClinico'));
     }
@@ -76,11 +86,11 @@ class PatientController extends Controller
         $reglas = [
             'nombre'     => 'required|string|max:120',
             'telefono'   => 'nullable|string|max:30',
-            'email'      => 'nullable|email|max:255',
+            'email'      => 'nullable|email|max:255|unique:patients,email,'.$id.',paciente_id',
             'birth_date' => 'nullable|date|before:today',
         ];
 
-        if (auth()->user()->rol === 'admin') {
+        if (auth()->user()->isManagementAdmin()) {
             $reglas['tipo_de_sangre']        = 'nullable|string|max:3';
             $reglas['alergias']              = 'nullable|string';
             $reglas['enfermedades_cronicas'] = 'nullable|string';
@@ -94,6 +104,7 @@ class PatientController extends Controller
 
     public function destroy($id)
     {
+        abort_unless(auth()->user()->isManagementAdmin(), 403);
         $paciente = Patient::findOrFail($id);
 
         if ($paciente->appointments()->count() > 0) {
@@ -102,6 +113,7 @@ class PatientController extends Controller
             ]);
         }
 
+        // Se mantiene una baja lógica para no perder el historial.
         $paciente->delete();
 
         return redirect()->route('pacientes.index')

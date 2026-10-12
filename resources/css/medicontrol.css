@@ -1,0 +1,43 @@
+/* Colores que mantienen la idea del mockup original, con mejor contraste. */
+:root { --mc-blue: #3979bd; --mc-deep: #183b64; --mc-soft: #eaf2fb; --mc-border: #dbe4ee; }
+* { box-sizing: border-box; }
+body { background: #f3f6fa; color: #26374c; min-height: 100vh; display: flex; flex-direction: column; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.mc-header { background: var(--mc-blue); color: white; }
+.mc-brand { color: white; text-decoration: none; font-size: 1.55rem; font-weight: 750; letter-spacing: -.035em; }
+.mc-brand span:not(.mc-logo) { color: #d7ecff; }
+.mc-brand:hover, .mc-brand:focus { color: white; }
+.mc-logo { width: 33px; height: 33px; display: inline-grid; place-items: center; color: var(--mc-deep); border-radius: 9px; background: white; font-size: 1.5rem; margin-right: .3rem; }
+.mc-header-user { color: #eaf3ff; font-size: .9rem; }
+.mc-navbar { background: #e1ebf8; border-bottom: 1px solid #ccdaea; }
+.navbar .nav-link { color: var(--mc-deep); font-weight: 600; }
+.navbar .nav-link:hover, .navbar .nav-link:focus { color: #1169b2; }
+.mc-main { flex: 1; width: 100%; padding-top: 2rem; padding-bottom: 3rem; }
+.mc-footer { color: #728092; font-size: .82rem; }
+.mc-card { background: white; border: 1px solid var(--mc-border); border-radius: 16px; box-shadow: 0 8px 25px rgba(30, 64, 101, .05); }
+.mc-card-head { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--mc-border); }
+.mc-card-body { padding: 1.5rem; }
+.mc-page-title { font-size: clamp(1.4rem, 3vw, 2rem); color: var(--mc-deep); margin-bottom: .3rem; font-weight: 750; }
+.mc-muted { color: #667589; }
+.mc-small-title { font-size: 1.08rem; color: var(--mc-deep); font-weight: 700; }
+.btn-primary { background-color: var(--mc-blue); border-color: var(--mc-blue); }
+.btn-primary:hover { background-color: #2b659f; border-color: #2b659f; }
+.form-control:focus, .form-select:focus { border-color: #67a1dc; box-shadow: 0 0 0 .2rem rgba(57,121,189,.17); }
+.form-label { font-weight: 600; font-size: .93rem; }
+.mc-auth { max-width: 510px; margin: 1rem auto 0; }
+.mc-auth .mc-card-body { padding: clamp(1.3rem, 4vw, 2.2rem); }
+.mc-pill { border-radius: 999px; padding: .34rem .72rem; display: inline-block; font-size: .79rem; font-weight: 700; white-space: nowrap; }
+.mc-status-pendiente { background: #eaf2ff; color: #125a9e; }
+.mc-status-confirmado { background: #d8f5df; color: #176236; }
+.mc-status-proceso { background: #fff0bb; color: #785400; }
+.mc-status-completada { background: #e5edf4; color: #46596d; }
+.mc-status-cancelada, .mc-status-no-show { background: #ffe0e0; color: #9a2831; }
+.mc-clinical-alert { background: #fff5dc; border: 1px solid #f3d38c; border-radius: 12px; padding: 1rem; }
+.mc-info-tile { background: #f5f9fe; border-radius: 10px; padding: .75rem 1rem; height: 100%; }
+.mc-info-tile dt { color: #617085; font-size: .81rem; font-weight: 600; }
+.mc-info-tile dd { margin: .2rem 0 0; font-weight: 650; overflow-wrap: anywhere; }
+.table thead th { background: #e9eef4; color: #445569; font-size: .84rem; }
+.table td { vertical-align: middle; }
+.mc-empty { text-align: center; padding: 2.5rem 1rem; color: #68798a; }
+.mc-kpi { background: #edf5ff; border-radius: 12px; padding: 1rem; }
+.mc-kpi-number { color: #215b91; font-size: 1.8rem; font-weight: 750; }
+@media (max-width: 575px) { .mc-main { padding-top: 1.3rem; } .mc-card-body { padding: 1rem; } .mc-card-head { padding: 1rem; } .mc-brand { font-size: 1.35rem; } .table { font-size: .87rem; } }

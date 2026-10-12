@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
+    use SoftDeletes;
+
     protected $primaryKey = 'appointment_id';
     protected $fillable = ['paciente_id', 'doctor_id', 'fecha', 'hora', 'razon', 'status', 'observaciones'];
 
@@ -16,6 +19,6 @@ class Appointment extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id')->withTrashed();
     }
 }

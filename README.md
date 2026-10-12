@@ -64,3 +64,14 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Ajustes de las vistas — Fase 2, integrante 5 (octubre 2026)
+
+- Se mantienen **solo tres roles** de acceso: `admin`, `recepcionista` y `paciente`.
+- Las doctoras se registran como personal médico para las citas, pero **no tienen login propio**.
+- Administración gestiona las fichas médicas, los usuarios y sus roles; recepción gestiona la agenda y confirma solicitudes según sus permisos.
+- El login conserva el botón para mostrar/ocultar contraseña y **no publica credenciales de demostración**.
+- Las dos doctoras ficticias siguen disponibles para asignar citas. Las cuentas médicas antiguas quedan bloqueadas por seguridad y se desactivan al ejecutar el seeder.
+- El paciente puede ver el estado actualizado de sus citas (consulta cada 25 segundos).
+
+Consulta `GUIA_INTEGRANTE_5.md` para los pasos de instalación y `DATOS_DE_PRUEBA.txt` para los únicos tres accesos locales. Ejecutar `php artisan migrate` y `php artisan db:seed` en la base local, sin borrar datos.

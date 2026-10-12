@@ -1,0 +1,19 @@
+MEDICONTROL - PROYECTO COMPLETO CON DISEÑO Y BACK-END
+
+PASOS EN WINDOWS:
+1. Extrae la carpeta MediControl donde prefieras (por ejemplo Documentos).
+2. En VS Code abre la carpeta MediControl, la que contiene el archivo artisan.
+3. Abre terminal ahi y comprueba: Test-Path .\artisan (debe decir True).
+4. Si quieres conservar tu configuracion local, COPIA SOLO tu archivo .env desde la carpeta anterior SistemaGestionClinica a la nueva MediControl. No compartas ni subas .env a GitHub.
+   Si no lo tienes: Copy-Item .env.example .env; php artisan key:generate. Edita DB_DATABASE, DB_USERNAME y DB_PASSWORD segun tu MySQL de XAMPP.
+5. Si hiciera falta: composer install y npm install.
+6. Enciende MySQL de XAMPP, abre tu base medicontrol existente (si es la misma PC).
+7. Ejecuta: php artisan optimize:clear
+8. Ejecuta: php artisan serve
+9. En otra terminal: npm run dev
+10. Abre http://127.0.0.1:8000/login
+
+ojo importante que lean esto
+
+No ejecuten migrate:fresh. En esta version NO se modificaron los controladores, rutas ni migraciones del ZIP original.
+La integracion se ha realizado a nivel de archivos y NO esta probada en el Windows local del usuario.

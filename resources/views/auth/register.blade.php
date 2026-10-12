@@ -1,52 +1,35 @@
 <x-guest-layout>
+    <h2>Crea tu cuenta</h2>
+    <p class="mc-auth-description">Regístrate como paciente para gestionar tus citas médicas.</p>
+    {{-- El registro público no permite escoger roles administrativos. --}}
     <form method="POST" action="{{ route('register') }}">
         @csrf
-
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        <div class="mb-3">
+            <label class="form-label" for="name">Nombre y apellidos</label>
+            <input class="form-control @error('name') is-invalid @enderror" type="text" id="name" name="name" value="{{ old('name') }}" maxlength="255" autocomplete="name" placeholder="Tu nombre completo" required autofocus>
+            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="mb-3">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input class="form-control @error('email') is-invalid @enderror" type="email" id="email" name="email" value="{{ old('email') }}" autocomplete="username" placeholder="nombre@correo.com" required>
+            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="mb-3">
+            <label class="form-label" for="password">Contraseña</label>
+            <div class="mc-password-wrap"><input class="form-control @error('password') is-invalid @enderror" type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres" required><button class="mc-password-toggle" type="button" data-password-toggle="password" aria-label="Mostrar contraseña">Ver</button></div>
+            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div class="mb-4">
+            <label class="form-label" for="password_confirmation">Confirmar contraseña</label>
+            <div class="mc-password-wrap"><input class="form-control @error('password_confirmation') is-invalid @enderror" type="password" id="password_confirmation" name="password_confirmation" minlength="8" autocomplete="new-password" placeholder="Repite tu contraseña" required><button class="mc-password-toggle" type="button" data-password-toggle="password_confirmation" aria-label="Mostrar contraseña">Ver</button></div>
+            @error('password_confirmation')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
+        <div class="form-check mb-4">
+            <input class="form-check-input @error('consentimiento') is-invalid @enderror" type="checkbox" value="1" id="consentimiento" name="consentimiento" required @checked(old('consentimiento'))>
+            <label class="form-check-label small" for="consentimiento">Acepto el uso de mis datos para administrar mis citas médicas.</label>
+            @error('consentimiento')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
+        <button class="btn btn-primary w-100" type="submit">Crear cuenta <span aria-hidden="true">→</span></button>
     </form>
+    <p class="mc-auth-foot mb-0">¿Ya tienes cuenta? <a href="{{ route('login') }}">Iniciar sesión</a></p>
 </x-guest-layout>
