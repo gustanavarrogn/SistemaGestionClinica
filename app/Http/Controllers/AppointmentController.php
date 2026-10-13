@@ -43,9 +43,12 @@ class AppointmentController extends Controller
     public function agenda(Request $request)
     {
         $fecha = $request->input('fecha', now()->toDateString());
+        $request->merge(['fecha' => $fecha]);
+        $request->validate(['fecha' => 'required|date']);
 
-        $citas = Appointment::with(['patient', 'doctor'])
-            ->whereDate('fecha', $fecha)
+        $consulta = Appointment::with(['patient', 'doctor'])
+            ->whereDate('fecha', $fecha);
+        $citas = $consulta
             ->orderBy('hora')
             ->get();
 
@@ -67,6 +70,16 @@ class AppointmentController extends Controller
         return view('paciente.mis-citas', compact('citas', 'paciente'));
     }
 
+    public function estadosPaciente()
+    {
+        $paciente = $this->pacienteDelUsuario();
+        if (!$paciente) return response()->json([]);
+
+        return response()->json(Appointment::where('paciente_id', $paciente->paciente_id)
+            ->get(['appointment_id', 'status'])
+            ->map(fn ($cita) => ['id' => $cita->appointment_id, 'status' => $cita->status]));
+    }
+
     public function create()
     {
         $doctores = Doctor::orderBy('nombre')->get();
@@ -85,7 +98,7 @@ class AppointmentController extends Controller
         $datos = $request->validate([
             'doctor_id'   => 'required|exists:doctors,doctor_id',
             'fecha'       => 'required|date',
-            'hora'        => 'required',
+            'hora'        => 'required|date_format:H:i',
             'razon'       => 'required|string|max:500',
             'paciente_id' => 'nullable|exists:patients,paciente_id',
         ], [
@@ -107,6 +120,10 @@ class AppointmentController extends Controller
             return back()->withInput()->withErrors([
                 'hora' => 'El horario de atencion es de '.self::HORA_APERTURA.':00 a '.self::HORA_CIERRE.':00.'
             ]);
+        }
+
+        if (!in_array($fechaHora->minute, [0, 30], true)) {
+            return back()->withInput()->withErrors(['hora' => 'Las citas se agendan en bloques de 30 minutos.']);
         }
 
         if ($fechaHora->isSunday()) {
@@ -145,7 +162,8 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            $datos['status'] = 'Confirmado';
+            // Las solicitudes de recepción quedan pendientes hasta que admin o recepción las confirmen.
+            $datos['status'] = $usuario->rol === 'recepcionista' ? 'Pendiente' : 'Confirmado';
         }
 
         $yaTieneCita = Appointment::where('paciente_id', $datos['paciente_id'])
@@ -185,7 +203,7 @@ class AppointmentController extends Controller
         $cita    = Appointment::findOrFail($id);
         $usuario = auth()->user();
 
-        if (in_array($cita->status, ['Completada', 'Cancelada'])) {
+        if (in_array($cita->status, ['Completada', 'Cancelada', 'No-show'], true)) {
             return back()->withErrors([
                 'cancelar' => 'Esta cita ya no se puede cancelar.'
             ]);
@@ -210,7 +228,7 @@ class AppointmentController extends Controller
 
         $cita->update([
             'status'        => 'Cancelada',
-            'observaciones' => $request->input('motivo_cancelacion', $cita->observaciones),
+            'observaciones' => $usuario->rol === 'admin' ? $request->input('motivo_cancelacion', $cita->observaciones) : $cita->observaciones,
         ]);
 
         return redirect()->route('citas.index')
@@ -223,7 +241,7 @@ class AppointmentController extends Controller
 
         $datos = $request->validate([
             'status'        => 'required|in:Pendiente,Confirmado,En proceso,Completada,Cancelada,No-show',
-            'observaciones' => 'nullable|string',
+            'observaciones' => 'nullable|string|max:2000',
         ]);
 
         $cambiosPermitidos = [
@@ -235,12 +253,14 @@ class AppointmentController extends Controller
             'No-show'    => [],
         ];
 
-        if (!in_array($datos['status'], $cambiosPermitidos[$cita->status])) {
+        if (!in_array($datos['status'], $cambiosPermitidos[$cita->status] ?? [], true)) {
             return back()->withErrors([
                 'status' => "No se puede pasar de '{$cita->status}' a '{$datos['status']}'."
             ]);
         }
 
+        // La recepcionista no puede registrar notas clínicas en una cita.
+        if (auth()->user()->rol === 'recepcionista') unset($datos['observaciones']);
         $cita->update($datos);
 
         return back()->with('exito', 'Estado de la cita actualizado.');
@@ -285,6 +305,6 @@ class AppointmentController extends Controller
 
     private function pacienteDelUsuario(): ?Patient
     {
-        return Patient::where('email', auth()->user()->email)->first();
+        return auth()->user()->patient;
     }
 }

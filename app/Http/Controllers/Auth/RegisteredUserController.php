@@ -3,49 +3,60 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        $datos = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'consentimiento' => ['accepted'],
+        ], [
+            'consentimiento.accepted' => 'Debes aceptar el tratamiento de tus datos para registrarte.',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // Si la clínica ya tiene una ficha con ese correo, debe vincularla el personal.
+        // No se asocia automáticamente un historial clínico a una cuenta recién creada.
+        if (Patient::where('email', $datos['email'])->exists()) {
+            return back()->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['email' => 'Ya existe una ficha con este correo. Contacta a recepción para vincular tu cuenta.']);
+        }
 
-        event(new Registered($user));
+        $usuario = DB::transaction(function () use ($datos) {
+            $paciente = Patient::create([
+                'nombre' => $datos['name'],
+                'email' => $datos['email'],
+            ]);
 
-        Auth::login($user);
+            return User::create([
+                'name' => $datos['name'],
+                'email' => $datos['email'],
+                'password' => Hash::make($datos['password']),
+                'rol' => 'paciente',
+                'patient_id' => $paciente->paciente_id,
+            ]);
+        });
 
-        return redirect(route('dashboard', absolute: false));
+        event(new Registered($usuario));
+        Auth::login($usuario);
+
+        return redirect()->route('dashboard');
     }
 }

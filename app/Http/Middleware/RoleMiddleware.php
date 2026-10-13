@@ -9,12 +9,13 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
+        $usuario = $request->user();
+        if (!$usuario) return redirect()->route('login');
 
-        if (!in_array(auth()->user()->rol, $roles)) {
-            abort(403, 'No tiene permiso para acceder a esta seccion.');
+        // Solo existen los roles de Fase 2. Los accesos médicos antiguos no se utilizan.
+        if ($usuario->isDoctor() || !in_array($usuario->rol, ['admin', 'recepcionista', 'paciente'], true)
+            || !in_array($usuario->rol, $roles, true)) {
+            abort(403, 'No tiene permiso para acceder a esta sección.');
         }
 
         return $next($request);
