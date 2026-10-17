@@ -169,7 +169,6 @@ Las rutas están protegidas con el middleware `role`. Si un usuario intenta entr
 - Flujo de estados: Pendiente → Confirmado → En proceso → Completada (o Cancelada / No-show).
 - El paciente solo puede **cancelar con al menos 12 horas** de anticipación.
 - No se puede desactivar una doctora con **citas activas**.
-- No se puede eliminar un paciente con **citas registradas**.
 - El paciente ve el estado de sus citas actualizado automáticamente cada 25 segundos.
 - El registro público crea la cuenta **y** la ficha de paciente.
 
@@ -187,7 +186,7 @@ Las pruebas usan una base SQLite en memoria (no tocan `medicontrol`). Requieren 
 
 ### Pruebas manuales (Fase 2)
 
-Se ejecutaron 31 casos de prueba sobre login, roles, CRUD de pacientes y doctores, reglas de agenda y registro. Resultados y evidencias en el documento PDF de entrega.
+Se ejecutaron 29 casos de prueba sobre login, roles, gestión de pacientes, CRUD de doctores, reglas de agenda y registro. Resultados y evidencias en el documento PDF de entrega.
 
 ## 8. Solución de problemas
 
@@ -216,7 +215,6 @@ tests/Feature/          Pruebas automatizadas
 
 ## 10. Limitaciones conocidas y pendientes
 
-- La interfaz de **Pacientes** no tiene botón para eliminar; la lógica existe en `PatientController@destroy`, pero no está conectada a ninguna vista.
 - Algunos mensajes del sistema (por ejemplo, el error de inicio de sesión) aparecen en inglés porque `APP_LOCALE=en`.
 - El botón "Eliminar" de doctores realiza una **desactivación** (soft delete) para conservar el historial.
 - Cuando el paciente agenda o cancela una cita, se le redirige al listado general `/citas` en lugar de "Mis citas".
