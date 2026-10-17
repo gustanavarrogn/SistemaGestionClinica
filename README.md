@@ -1,77 +1,222 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MediControl – Sistema de Gestión de Citas Médicas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para gestionar pacientes, personal médico y citas de una clínica. Proyecto de la asignatura **DWS901 – Desarrollo de Aplicaciones Web con Software Interpretado en el Servidor**, Fase 2 (núcleo del Back-End).
 
-## About Laravel
+## Tecnologías
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Componente | Tecnología |
+|---|---|
+| Framework | Laravel 12 (PHP 8.2+) |
+| Base de datos | MySQL / MariaDB (XAMPP) |
+| Autenticación | Laravel Breeze |
+| Vistas | Blade + Tailwind CSS, compilado con Vite |
+| Control de versiones | Git / GitHub |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Equipo y responsabilidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Integrante | Responsabilidad |
+|---|---|
+| #1 | Configuración del entorno y estructura del proyecto |
+| #2 | Servidor, ruteo y lógica de negocio |
+| #3 | Base de datos y persistencia (migraciones, modelos, CRUD) |
+| #4 | Autenticación y control de acceso por roles |
+| #5 | Vistas Blade y conexión con el Back-End |
+| #6 | Control de versiones, pruebas (QA), documentación y entrega |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 1. Requisitos previos
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **XAMPP** con PHP **8.2 o superior** (incluye MySQL/MariaDB y phpMyAdmin).
+- **Composer** 2.x — https://getcomposer.org
+- **Node.js** 18 o superior (incluye npm).
+- **Git**.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Comprueba en una terminal:
 
-## Laravel Sponsors
+```bash
+php -v
+composer -V
+node -v
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Configuración de PHP en XAMPP
 
-### Premium Partners
+1. Agrega `C:\xampp\php` a la variable de entorno **Path** de Windows (si `php -v` dice que no se reconoce).
+2. Abre `C:\xampp\php\php.ini` (XAMPP → Apache → Config → PHP (php.ini)) y quita el `;` de estas líneas:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+   ```ini
+   extension=zip
+   extension=intl
+   extension=gd
+   ```
 
-## Contributing
+   Sin `extension=zip`, `composer install` falla con *"The zip extension and unzip/7z commands are both missing"*.
+3. Cierra y vuelve a abrir la terminal.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 2. Instalación
 
-## Code of Conduct
+### 2.1 Clonar el repositorio
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/gustanavarrogn/SistemaGestionClinica.git
+cd SistemaGestionClinica
+```
 
-## Security Vulnerabilities
+> **Recomendado:** clona el proyecto **fuera de OneDrive** (por ejemplo en `C:\proyectos`). OneDrive bloquea carpetas como `bootstrap/cache` y vuelve lentos `composer install` y `npm install`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 2.2 Crear la base de datos
 
-## License
+1. Abre el **XAMPP Control Panel** y enciende **Apache** y **MySQL**.
+2. Entra a `http://localhost/phpmyadmin` → **Nueva** → nombre `medicontrol` → **Crear** (solo la base vacía).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 2.3 Configurar el archivo `.env`
 
-## Ajustes de las vistas — Fase 2, integrante 5 (octubre 2026)
+```bash
+copy .env.example .env
+```
 
-- Se mantienen **solo tres roles** de acceso: `admin`, `recepcionista` y `paciente`.
-- Las doctoras se registran como personal médico para las citas, pero **no tienen login propio**.
-- Administración gestiona las fichas médicas, los usuarios y sus roles; recepción gestiona la agenda y confirma solicitudes según sus permisos.
-- El login conserva el botón para mostrar/ocultar contraseña y **no publica credenciales de demostración**.
-- Las dos doctoras ficticias siguen disponibles para asignar citas. Las cuentas médicas antiguas quedan bloqueadas por seguridad y se desactivan al ejecutar el seeder.
-- El paciente puede ver el estado actualizado de sus citas (consulta cada 25 segundos).
+Edita la conexión según tu MySQL:
 
-Consulta `GUIA_INTEGRANTE_5.md` para los pasos de instalación y `DATOS_DE_PRUEBA.txt` para los únicos tres accesos locales. Ejecutar `php artisan migrate` y `php artisan db:seed` en la base local, sin borrar datos.
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306        # usa 3307 si cambiaste el puerto en XAMPP
+DB_DATABASE=medicontrol
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+> El archivo `.env` es personal: **no se sube a GitHub**.
+
+### 2.4 Instalar dependencias y preparar la base
+
+**Opción A – Instalador automático (Windows):**
+
+```bash
+.\PREPARAR_EN_WINDOWS.bat
+```
+
+Instala dependencias PHP, genera la clave, ejecuta migraciones y carga datos de prueba. Cuando pregunte si MySQL está encendido, responde **S**.
+
+**Opción B – Manual:**
+
+```bash
+composer install
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+```
+
+### 2.5 Compilar los estilos
+
+```bash
+npm install
+npm run build
+```
+
+> En **PowerShell**, si aparece *"la ejecución de scripts está deshabilitada"*, usa `npm.cmd install` y `npm.cmd run build`, o ejecuta una vez:
+> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+## 3. Ejecución
+
+```bash
+php artisan serve
+```
+
+(o doble clic en `INICIAR_MEDICONTROL.bat`)
+
+Abre **http://127.0.0.1:8000/login**. Deja la terminal abierta mientras uses la aplicación.
+
+Para las siguientes veces solo se necesita: encender **MySQL** en XAMPP y ejecutar `php artisan serve`.
+
+> ⚠️ **No ejecutes `php artisan migrate:fresh`**: borra todas las tablas y los datos registrados.
+
+## 4. Usuarios de prueba
+
+Creados por el seeder (`php artisan db:seed`). Son solo para entorno local.
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | admin@medicontrol.test | Demo12345! |
+| Recepcionista | recepcion@medicontrol.test | Demo12345! |
+| Paciente | paciente@medicontrol.test | Demo12345! |
+
+El seeder también crea dos doctoras (Dra. Valeria Rivas y Dra. Elena Morales) y dos citas de ejemplo. Las doctoras **no inician sesión**: se registran como personal médico para asignarles citas.
+
+## 5. Roles y permisos
+
+| Módulo | Administrador | Recepcionista | Paciente |
+|---|:---:|:---:|:---:|
+| Panel de administración | ✅ | — | — |
+| Pacientes (crear, ver, editar) | ✅ | ✅ | — |
+| Doctores (CRUD) | ✅ | — | — |
+| Usuarios y roles | ✅ | — | — |
+| Agenda del día / cambiar estado de citas | ✅ | ✅ | — |
+| Agendar citas | ✅ | ✅ | ✅ (solicitud) |
+| Mis citas / cancelar su cita | — | — | ✅ |
+
+Las rutas están protegidas con el middleware `role`. Si un usuario intenta entrar a una sección sin permiso, recibe **403 – No tiene permiso para acceder a esta sección**.
+
+## 6. Reglas de negocio implementadas
+
+- Horario de atención de **8:00 a 17:00**, en bloques de **30 minutos** (última cita 16:30).
+- La clínica **no atiende domingos**.
+- No se pueden agendar citas en fechas u horas **pasadas**.
+- Una doctora **no puede tener dos citas a la misma hora**.
+- Un paciente **no puede tener dos citas el mismo día**.
+- Las citas solicitadas por un paciente o por recepción quedan **Pendientes** hasta que recepción o administración las confirmen; las que crea el administrador quedan **Confirmadas**.
+- Flujo de estados: Pendiente → Confirmado → En proceso → Completada (o Cancelada / No-show).
+- El paciente solo puede **cancelar con al menos 12 horas** de anticipación.
+- No se puede desactivar una doctora con **citas activas**.
+- No se puede eliminar un paciente con **citas registradas**.
+- El paciente ve el estado de sus citas actualizado automáticamente cada 25 segundos.
+- El registro público crea la cuenta **y** la ficha de paciente.
+
+## 7. Pruebas
+
+### Pruebas automatizadas
+
+```bash
+php artisan test
+```
+
+Incluye pruebas de acceso por rol, registro público, seeder y gestión de doctoras/usuarios (`tests/Feature/MediControlFlujoTest.php` y `tests/Feature/MediControlRolesYAgendaTest.php`).
+
+Las pruebas usan una base SQLite en memoria (no tocan `medicontrol`). Requieren activar `extension=pdo_sqlite` y `extension=sqlite3` en `php.ini`.
+
+### Pruebas manuales (Fase 2)
+
+Se ejecutaron 31 casos de prueba sobre login, roles, CRUD de pacientes y doctores, reglas de agenda y registro. Resultados y evidencias en el documento PDF de entrega.
+
+## 8. Solución de problemas
+
+| Error | Solución |
+|---|---|
+| `could not find driver` al ejecutar `php artisan test` | Activa `extension=pdo_sqlite` y `extension=sqlite3` en `php.ini`. |
+| `Port 3306 in use` al encender MySQL | Otro MySQL usa el puerto. Cambia XAMPP a 3307 y pon `DB_PORT=3307` en `.env`. |
+| `The zip extension and unzip/7z commands are both missing` | Activa `extension=zip` en `php.ini`. |
+| `bootstrap\cache directory must be present and writable` | Ejecuta `attrib -r bootstrap\cache /s /d` o mueve el proyecto fuera de OneDrive. |
+| `npm.ps1 no se puede cargar…` | Usa `npm.cmd` o cambia la política de ejecución (ver 2.5). |
+| `Vite manifest not found` | Ejecuta `npm run build`. |
+| `SQLSTATE[HY000] [2002]` / no conecta a la BD | Verifica que MySQL esté encendido y que `DB_PORT` coincida con el de XAMPP. |
+
+## 9. Estructura principal
+
+```
+app/Http/Controllers/   Controladores (citas, pacientes, doctores, usuarios, auth)
+app/Http/Middleware/    RoleMiddleware y EnsureActiveUser
+app/Models/             User, Patient, Doctor, Appointment
+database/migrations/    Tablas users, patients, doctors, appointments y ajustes
+database/seeders/       Datos de prueba
+resources/views/        Vistas Blade por módulo
+routes/web.php          Rutas protegidas por rol
+tests/Feature/          Pruebas automatizadas
+```
+
+## 10. Limitaciones conocidas y pendientes
+
+- La interfaz de **Pacientes** no tiene botón para eliminar; la lógica existe en `PatientController@destroy`, pero no está conectada a ninguna vista.
+- Algunos mensajes del sistema (por ejemplo, el error de inicio de sesión) aparecen en inglés porque `APP_LOCALE=en`.
+- El botón "Eliminar" de doctores realiza una **desactivación** (soft delete) para conservar el historial.
+- Cuando el paciente agenda o cancela una cita, se le redirige al listado general `/citas` en lugar de "Mis citas".
