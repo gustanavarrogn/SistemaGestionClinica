@@ -9,6 +9,8 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
 Route::get('/dashboard', function () {
@@ -82,5 +84,22 @@ Route::middleware(['auth', 'role:admin,recepcionista,paciente'])->group(function
 Route::middleware(['auth', 'role:admin,recepcionista'])->group(function () {
     Route::put('/citas/{id}/estado', [AppointmentController::class, 'cambiarEstado'])->name('citas.estado');
 });
+// Documentos: subir y eliminar solo el personal de la clinica
+Route::middleware(['auth', 'role:admin,recepcionista'])->group(function () {
+    Route::post('/documentos', [DocumentController::class, 'store'])->name('documentos.store');
+    Route::delete('/documentos/{id}', [DocumentController::class, 'destroy'])->name('documentos.destroy');
+});
 
+// Documentos: ver y descargar los tres roles, el controlador filtra al paciente
+Route::middleware('auth')->group(function () {
+    Route::get('/pacientes/{paciente}/documentos', [DocumentController::class, 'index'])->name('documentos.index');
+    Route::get('/documentos/{id}/descargar', [DocumentController::class, 'descargar'])->name('documentos.descargar');
+});
+
+// Reportes: solo administrador
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/reportes', [ReportController::class, 'index'])->name('reportes.index');
+    Route::get('/reportes/pdf', [ReportController::class, 'exportarPdf'])->name('reportes.pdf');
+    Route::get('/reportes/excel', [ReportController::class, 'exportarExcel'])->name('reportes.excel');
+});
 require __DIR__.'/auth.php';
