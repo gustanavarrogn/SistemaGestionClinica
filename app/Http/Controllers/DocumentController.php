@@ -16,10 +16,10 @@ class DocumentController extends Controller
     {
         $paciente = Patient::findOrFail($pacienteId);
 
-        $this->verificarAcceso($paciente);
+        $this->verificarAcceso($paciente->paciente_id);
 
         $documentos = Documento::with('usuario')
-            ->where('paciente_id', $pacienteId)
+            ->where('paciente_id', $paciente->paciente_id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -72,14 +72,18 @@ class DocumentController extends Controller
 
     public function descargar($id)
     {
-        $documento = Documento::findOrFail($id);
+        $documento = Documento::find($id);
 
-        $this->verificarAcceso($documento->paciente);
+        // Si el documento no existe, se responde 404 y no un error del servidor
+        if (!$documento) {
+            abort(404, 'El documento solicitado no existe.');
+        }
+
+        // Se valida el permiso comparando el identificador, sin depender de la relacion
+        $this->verificarAcceso($documento->paciente_id);
 
         if (!Storage::disk('local')->exists($documento->ruta)) {
-            return back()->withErrors([
-                'descargar' => 'El archivo ya no se encuentra en el servidor.'
-            ]);
+            abort(404, 'El archivo ya no se encuentra en el servidor.');
         }
 
         return Storage::disk('local')->download($documento->ruta, $documento->nombre_original);
@@ -89,7 +93,12 @@ class DocumentController extends Controller
     {
         abort_unless(auth()->user()->rol === 'admin', 403);
 
-        $documento = Documento::findOrFail($id);
+        $documento = Documento::find($id);
+
+        if (!$documento) {
+            abort(404, 'El documento solicitado no existe.');
+        }
+
         $pacienteId = $documento->paciente_id;
 
         if (Storage::disk('local')->exists($documento->ruta)) {
@@ -102,14 +111,17 @@ class DocumentController extends Controller
                          ->with('exito', 'Documento eliminado.');
     }
 
-    private function verificarAcceso(Patient $paciente): void
+    // Un paciente solo llega a lo suyo. Compara numeros, no objetos.
+    private function verificarAcceso($pacienteId): void
     {
-        if (auth()->user()->rol === 'paciente') {
-            $propio = auth()->user()->patient;
+        if (auth()->user()->rol !== 'paciente') {
+            return;
+        }
 
-            if (!$propio || $propio->paciente_id !== $paciente->paciente_id) {
-                abort(403, 'No tiene permiso para ver estos documentos.');
-            }
+        $propio = auth()->user()->patient;
+
+        if (!$propio || (int) $propio->paciente_id !== (int) $pacienteId) {
+            abort(403, 'No tiene permiso para acceder a estos documentos.');
         }
     }
 }
