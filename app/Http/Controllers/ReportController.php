@@ -44,8 +44,14 @@ class ReportController extends Controller
 
             fputcsv($archivo, ['Reporte MediControl']);
             fputcsv($archivo, ['Periodo', $datos['desde'].' al '.$datos['hasta']]);
-            fputcsv($archivo, []);
 
+            fputcsv($archivo, []);
+            fputcsv($archivo, ['Resumen']);
+            fputcsv($archivo, ['Total de citas', $datos['totalCitas']]);
+            fputcsv($archivo, ['Citas sin asistencia', $datos['noAsistio']]);
+            fputcsv($archivo, ['Tasa de inasistencia', $datos['tasaInasistencia'].'%']);
+
+            fputcsv($archivo, []);
             fputcsv($archivo, ['Citas por estado']);
             fputcsv($archivo, ['Estado', 'Cantidad']);
             foreach ($datos['porEstado'] as $fila) {
