@@ -25,6 +25,12 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class, 'user_id')->withTrashed();
     }
 
+    // Fase 3: documentos que subió este usuario
+    public function documentosSubidos()
+    {
+        return $this->hasMany(Documento::class, 'subido_por');
+    }
+
     public function isDoctor(): bool
     {
         return $this->doctor()->exists();

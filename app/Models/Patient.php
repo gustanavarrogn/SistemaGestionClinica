@@ -16,4 +16,10 @@ class Patient extends Model
     {
         return $this->hasMany(Appointment::class, 'paciente_id');
     }
+
+    // Fase 3: documentos del paciente (recetas, resultados, etc.)
+    public function documentos()
+    {
+        return $this->hasMany(Documento::class, 'paciente_id');
+    }
 }
