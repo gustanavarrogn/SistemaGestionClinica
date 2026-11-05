@@ -78,7 +78,7 @@ En Blade: `{{ $resumen['total_citas'] }}`, `@foreach ($porDoctor as $fila) {{ $f
 
 ## 4. Tabla `documentos` y modelo `Documento`
 
-Un paciente (y opcionalmente una cita) puede tener **varios** documentos: recetas, resultados de laboratorio, órdenes médicas, imágenes, constancias.
+Las columnas coinciden con lo que guarda `DocumentController` (subir, listar, descargar y eliminar). Un paciente (y opcionalmente una cita) puede tener **varios** documentos.
 
 | Columna | Tipo | Nota |
 |---|---|---|
@@ -86,41 +86,14 @@ Un paciente (y opcionalmente una cita) puede tener **varios** documentos: receta
 | `paciente_id` | FK → `patients` | obligatorio; si se borra el paciente se borran sus documentos |
 | `appointment_id` | FK → `appointments` | opcional; si se borra la cita queda en NULL |
 | `subido_por` | FK → `users` | opcional; quién lo subió |
-| `tipo` | enum | `Receta`, `Resultado de laboratorio`, `Orden médica`, `Imagen médica`, `Constancia`, `Otro` (por defecto `Otro`) |
-| `titulo`, `descripcion` | texto | |
-| `ruta`, `nombre_original`, `mime`, `tamano` | datos del archivo | el archivo físico va en `storage/app/public/documentos` |
+| `tipo` | enum | `receta`, `examen`, `otro` (por defecto `otro`) |
+| `nombre_original`, `ruta`, `mime`, `peso_kb` | datos del archivo | el archivo físico va en el disco privado `local` (`storage/app/private/documentos`) |
 | `created_at`, `updated_at`, `deleted_at` | | borrado suave (soft delete) |
 
-**Relaciones:** `$paciente->documentos`, `$cita->documentos`, `$usuario->documentosSubidos`, `$documento->patient`, `$documento->appointment`, `$documento->subidoPor`.
+**Relaciones:** `$paciente->documentos`, `$cita->documentos`, `$usuario->documentosSubidos`, `$documento->patient`, `$documento->appointment`, `$documento->usuario`.
 
-**Ayudas del modelo:** `$documento->url`, `$documento->tamano_legible` ("244 KB"), `esPdf()`, `esImagen()`, `archivoExiste()`, y la constante `Documento::TIPOS` para llenar un `<select>`.
+**Ayudas del modelo:** `$documento->url_descarga` (ruta `documentos.descargar`), `$documento->tamano_legible` ("245 KB"), `esPdf()`, `esImagen()`, `archivoExiste()`, y la constante `Documento::TIPOS` para llenar un `<select>`.
 
-**Filtros:** `Documento::delPaciente($id)->delTipo('Receta')->deLaCita($citaId)->entreFechas($desde, $hasta)->get()`.
+**Filtros:** `Documento::delPaciente($id)->delTipo('receta')->deLaCita($citaId)->entreFechas($desde, $hasta)->get()`.
 
-**Borrado:** `$documento->delete()` lo oculta y conserva el archivo; `$documento->forceDelete()` lo elimina de la base y borra el archivo del disco.
-
-Ejemplo para quien programe la subida (controlador):
-
-```php
-$request->validate([
-    'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-    'tipo'    => 'required|in:'.implode(',', \App\Models\Documento::TIPOS),
-    'titulo'  => 'required|string|max:150',
-]);
-
-$archivo = $request->file('archivo');
-Documento::create([
-    'paciente_id'     => $paciente->paciente_id,
-    'appointment_id'  => $request->input('appointment_id'),   // opcional
-    'subido_por'      => auth()->id(),
-    'tipo'            => $request->tipo,
-    'titulo'          => $request->titulo,
-    'descripcion'     => $request->descripcion,
-    'ruta'            => $archivo->store('documentos', 'public'),
-    'nombre_original' => $archivo->getClientOriginalName(),
-    'mime'            => $archivo->getMimeType(),
-    'tamano'          => $archivo->getSize(),
-]);
-```
-
-**Reportes nuevos en `ReporteService`:** `documentosPorTipo()` (incluye tipos con 0 y bytes usados), `documentosPorMes()`, `documentosPorPaciente()`, `listadoDocumentos()`, y `resumenGeneral()` ahora incluye `total_documentos`.
+**Reportes en `ReporteService`:** `documentosPorTipo()` (incluye tipos con 0 y KB usados), `documentosPorMes()`, `documentosPorPaciente()`, `listadoDocumentos()`, y `resumenGeneral()` incluye `total_documentos`.

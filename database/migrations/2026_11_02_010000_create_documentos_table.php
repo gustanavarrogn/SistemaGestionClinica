@@ -7,12 +7,14 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Fase 3 – Integrante #3 (Base de Datos y Modelos)
  *
- * Tabla de documentos subidos al sistema (recetas, resultados de laboratorio,
- * órdenes médicas, imágenes, etc.). Cada documento pertenece a un paciente y,
- * de forma opcional, a una cita. Un paciente o una cita pueden tener varios.
+ * Tabla de documentos subidos al sistema (recetas, exámenes, otros).
+ * Cada documento pertenece a un paciente y, de forma opcional, a una cita.
+ * Un paciente o una cita pueden tener varios documentos.
  *
+ * Las columnas coinciden con lo que guarda DocumentController@store.
  * En la base de datos solo se guarda la RUTA; el archivo físico queda en
- * storage/app/public/documentos (disco "public").
+ * storage/app/private/documentos (disco "local", privado). Se descarga
+ * por la ruta documentos.descargar, que valida los permisos.
  */
 return new class extends Migration
 {
@@ -27,17 +29,14 @@ return new class extends Migration
             // Usuario que lo subió (si se borra el usuario, el documento se conserva)
             $table->unsignedBigInteger('subido_por')->nullable();
 
-            // Datos descriptivos
-            $table->enum('tipo', ['Receta', 'Resultado de laboratorio', 'Orden médica', 'Imagen médica', 'Constancia', 'Otro'])
-                  ->default('Otro');
-            $table->string('titulo', 150);
-            $table->text('descripcion')->nullable();
+            // Tipo de documento (mismos valores que valida DocumentController)
+            $table->enum('tipo', ['receta', 'examen', 'otro'])->default('otro');
 
             // Datos del archivo
-            $table->string('ruta', 255);                 // ej: "documentos/7f3a...c1.pdf"
             $table->string('nombre_original', 255);      // ej: "resultado_hemograma.pdf"
+            $table->string('ruta', 255);                 // ej: "documentos/doc_3_1730000000.pdf"
             $table->string('mime', 100)->nullable();     // ej: "application/pdf"
-            $table->unsignedInteger('tamano')->nullable(); // bytes
+            $table->unsignedInteger('peso_kb')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

@@ -311,13 +311,13 @@ class ReporteService
             ->when($hasta, fn ($q) => $q->where('documentos.created_at', '<=', $hasta.' 23:59:59'));
     }
 
-    /** Documentos por tipo (incluye tipos con 0) y espacio que ocupan. */
+    /** Documentos por tipo (incluye tipos con 0) y espacio que ocupan en KB. */
     public function documentosPorTipo(?string $desde = null, ?string $hasta = null): Collection
     {
         $filas = $this->documentosBase($desde, $hasta)
             ->select('tipo')
             ->selectRaw('COUNT(*) AS total')
-            ->selectRaw('COALESCE(SUM(tamano), 0) AS bytes')
+            ->selectRaw('COALESCE(SUM(peso_kb), 0) AS peso_kb')
             ->groupBy('tipo')
             ->get()
             ->keyBy('tipo');
@@ -325,7 +325,7 @@ class ReporteService
         return collect(Documento::TIPOS)->map(fn ($tipo) => (object) [
             'tipo'  => $tipo,
             'total' => (int) ($filas[$tipo]->total ?? 0),
-            'bytes' => (int) ($filas[$tipo]->bytes ?? 0),
+            'peso_kb' => (int) ($filas[$tipo]->peso_kb ?? 0),
         ]);
     }
 
@@ -360,7 +360,7 @@ class ReporteService
     /** Listado de documentos con paciente, cita y quién lo subió (Eloquent). */
     public function listadoDocumentos(?string $desde = null, ?string $hasta = null, $pacienteId = null, ?string $tipo = null)
     {
-        return Documento::with(['patient:paciente_id,nombre', 'appointment:appointment_id,fecha,hora', 'subidoPor:id,name'])
+        return Documento::with(['patient:paciente_id,nombre', 'appointment:appointment_id,fecha,hora', 'usuario:id,name'])
             ->entreFechas($desde, $hasta)
             ->delPaciente($pacienteId)
             ->delTipo($tipo)

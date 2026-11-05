@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
  * Fase 3 – Integrante #3 (Base de Datos y Modelos)
  *
  * Documento subido al sistema. Pertenece a un paciente y opcionalmente a una cita.
+ * Lo usa DocumentController (subir, listar, descargar y eliminar).
  */
 class Documento extends Model
 {
@@ -19,22 +20,21 @@ class Documento extends Model
     protected $table = 'documentos';
     protected $primaryKey = 'documento_id';
 
-    /** Tipos permitidos (mismos valores que el enum de la migración). */
-    public const TIPOS = ['Receta', 'Resultado de laboratorio', 'Orden médica', 'Imagen médica', 'Constancia', 'Otro'];
+    /** Tipos permitidos (mismos valores que el enum y que DocumentController). */
+    public const TIPOS = ['receta', 'examen', 'otro'];
 
-    /** Disco donde se guardan los archivos. */
-    public const DISCO = 'public';
+    /** Disco privado donde DocumentController guarda los archivos. */
+    public const DISCO = 'local';
 
     protected $fillable = [
         'paciente_id', 'appointment_id', 'subido_por',
-        'tipo', 'titulo', 'descripcion',
-        'ruta', 'nombre_original', 'mime', 'tamano',
+        'tipo', 'nombre_original', 'ruta', 'mime', 'peso_kb',
     ];
 
     protected function casts(): array
     {
         return [
-            'tamano' => 'integer',
+            'peso_kb' => 'integer',
         ];
     }
 
@@ -50,26 +50,25 @@ class Documento extends Model
         return $this->belongsTo(Appointment::class, 'appointment_id')->withTrashed();
     }
 
-    public function subidoPor()
+    /** Usuario que subió el documento (DocumentController usa with('usuario')). */
+    public function usuario()
     {
         return $this->belongsTo(User::class, 'subido_por');
     }
 
     /* ---------------- Atributos de ayuda ---------------- */
 
-    /** URL pública del archivo (requiere `php artisan storage:link`). */
-    public function getUrlAttribute(): ?string
+    /** Enlace de descarga (pasa por DocumentController@descargar, que valida permisos). */
+    public function getUrlDescargaAttribute(): string
     {
-        return $this->ruta ? Storage::disk(self::DISCO)->url($this->ruta) : null;
+        return route('documentos.descargar', $this->documento_id);
     }
 
     /** Tamaño legible: "245 KB", "1.3 MB". */
     public function getTamanoLegibleAttribute(): string
     {
-        $bytes = (int) $this->tamano;
-        if ($bytes >= 1048576) return round($bytes / 1048576, 1).' MB';
-        if ($bytes >= 1024)    return round($bytes / 1024).' KB';
-        return $bytes.' B';
+        $kb = (int) $this->peso_kb;
+        return $kb >= 1024 ? round($kb / 1024, 1).' MB' : $kb.' KB';
     }
 
     public function esPdf(): bool
@@ -110,18 +109,5 @@ class Documento extends Model
         return $query
             ->when($desde, fn ($q) => $q->where('created_at', '>=', $desde.' 00:00:00'))
             ->when($hasta, fn ($q) => $q->where('created_at', '<=', $hasta.' 23:59:59'));
-    }
-
-    /* ---------------- Borrado del archivo físico ---------------- */
-
-    protected static function booted(): void
-    {
-        // Con delete() normal (soft delete) el archivo se conserva.
-        // Solo al eliminar definitivamente (forceDelete) se borra del disco.
-        static::forceDeleted(function (Documento $documento) {
-            if ($documento->ruta) {
-                Storage::disk(self::DISCO)->delete($documento->ruta);
-            }
-        });
     }
 }
