@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Archivos generados por herramientas externas
+/Claude outputs
