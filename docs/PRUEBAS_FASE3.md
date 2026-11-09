@@ -15,18 +15,18 @@ Cada caso se ejecuta en localhost (XAMPP + `php artisan serve`) con los usuarios
 
 | ID | Módulo | Caso de prueba | Rol | Resultado esperado | Resultado | Defecto |
 |---|---|---|---|---|---|---|
-| P3-01 | Autenticación | Iniciar sesión con credenciales válidas | Admin, Recepción, Paciente | Entra y redirige al panel de su rol | Aprobada (automatizada) | |
+| P3-01 | Autenticación | Iniciar sesión con credenciales válidas | Admin, Recepción, Paciente | Entra y redirige al panel de su rol | Aprobada (automatizada y manual) | |
 | P3-02 | Autenticación | Iniciar sesión con contraseña incorrecta | Cualquiera | Mensaje de error, no entra | Aprobada (automatizada) | |
 | P3-03 | Roles | Paciente intenta abrir `/reportes`, `/doctores` o `/usuarios` | Paciente | 403 (acceso denegado) | Pendiente | |
 | P3-04 | Roles | Recepción intenta abrir `/reportes` | Recepción | 403 | Pendiente | |
 | P3-05 | Pacientes | Registrar paciente con datos válidos | Admin, Recepción | Se guarda y muestra mensaje de éxito | Pendiente | |
 | P3-06 | Pacientes | Registrar paciente con campos obligatorios vacíos | Admin, Recepción | Validación en cliente y en servidor; no se guarda | Pendiente | |
-| P3-07 | Pacientes | Buscar paciente por nombre, teléfono o correo | Admin, Recepción | La tabla filtra los resultados | Pendiente | |
-| P3-08 | Pacientes | Editar y eliminar paciente | Admin | Cambios guardados; botón eliminar solo para admin | Pendiente | |
+| P3-07 | Pacientes | Buscar paciente por nombre, teléfono o correo | Admin, Recepción | La tabla filtra los resultados | Aprobada | |
+| P3-08 | Pacientes | Editar y eliminar paciente | Admin | Cambios guardados; botón eliminar solo para admin | Aprobada (edición) | |
 | P3-09 | Doctores | Crear, editar y eliminar doctora | Admin | CRUD completo con mensajes | Pendiente | |
 | P3-10 | Citas | Agendar cita en horario disponible | Paciente, Recepción | Cita en estado Pendiente | Pendiente | |
 | P3-11 | Citas | Agendar cita en horario ocupado o fecha pasada | Paciente | La regla de negocio la rechaza con mensaje | Pendiente | |
-| P3-12 | Citas | Cambiar estado (Confirmado, Completada, No-show) | Admin, Recepción | Estado actualizado en la agenda | Pendiente | |
+| P3-12 | Citas | Cambiar estado (Confirmado, Completada, No-show) | Admin, Recepción | Estado actualizado en la agenda | Aprobada (cancelación por admin) | |
 | P3-13 | Citas | Paciente cancela su cita | Paciente | Estado Cancelada; no puede cancelar citas ajenas | Pendiente | |
 | P3-14 | Documentos | Subir PDF/JPG/PNG de hasta 5 MB a un paciente | Admin, Recepción | Se guarda y aparece en la lista de documentos | Fallida | D-01 |
 | P3-15 | Documentos | Subir archivo .exe o mayor de 5 MB | Admin, Recepción | Rechazo con "Solo se permiten archivos PDF, JPG o PNG" / "no puede pesar más de 5 MB" | Pendiente | |
@@ -38,7 +38,7 @@ Cada caso se ejecuta en localhost (XAMPP + `php artisan serve`) con los usuarios
 | P3-21 | Reportes | Filtrar por rango de fechas; fecha final anterior a la inicial | Admin | Filtra; con rango inválido muestra "La fecha final no puede ser anterior a la inicial." | Fallida | D-01 |
 | P3-22 | Reportes | Visualizar gráficos | Admin | Gráficos de citas por estado, doctora y mes | Fallida | D-02 |
 | P3-23 | Reportes | Exportar a PDF | Admin | Descarga `reporte_medicontrol_AAAA-MM-DD.pdf` | Fallida | D-01 |
-| P3-24 | Reportes | Exportar a Excel (CSV) | Admin | Descarga CSV que abre en Excel con acentos correctos (BOM UTF-8) | Pendiente | |
+| P3-24 | Reportes | Exportar a Excel (CSV) | Admin | Descarga CSV que abre en Excel con acentos correctos (BOM UTF-8) y datos en columnas | Fallida | D-09 |
 | P3-25 | Navegación | Acceder a Reportes y Documentos desde el menú | Admin, Recepción | Enlaces visibles según rol | Fallida | D-03 |
 | P3-26 | Interfaz | Revisar vistas en escritorio y móvil (390 px) | Todos | Diseño adaptable, sin desbordes | Pendiente | |
 | P3-27 | Compatibilidad | Repetir el flujo principal en Chrome y Edge | Todos | Mismo comportamiento | Pendiente | |
@@ -46,7 +46,7 @@ Cada caso se ejecuta en localhost (XAMPP + `php artisan serve`) con los usuarios
 
 ## 2. Registro de defectos
 
-Encontrados por revisión de código de la rama `main` y por la ejecución de `php artisan test` el 8/11/2026.
+Encontrados por revisión de código de la rama `main`, por la ejecución de `php artisan test` y por la ejecución de la matriz en localhost (Windows 11, XAMPP, Edge) el 8/11/2026.
 
 | ID | Descripción | Prioridad | Responsable | Estado |
 |---|---|---|---|---|
@@ -57,6 +57,7 @@ Encontrados por revisión de código de la rama `main` y por la ejecución de `p
 | D-05 | `ReportController` repite consultas en lugar de usar `ReporteService` (#3), que ya calcula más métricas (por especialidad, pacientes frecuentes, % completadas). | Baja | #2 / #3 | Abierto |
 | D-06 | El teléfono del paciente solo valida longitud (`max:30`); no aplica un formato (por ejemplo, la expresión regular `^[267]\d{3}-?\d{4}$` para El Salvador). | Media | #2 | Abierto |
 | D-08 | Primera ejecución de `php artisan test`: 16 de 34 pruebas fallaban. Causa: `UserFactory` no definía `is_active` ni `rol`, y `EnsureActiveUser` cerraba la sesión de los usuarios de prueba (302 a /login). Además, `ExampleTest` esperaba 200 en `/` (la raíz redirige al login) y `RegistrationTest` no enviaba `consentimiento`. | Alta | #6 | Corregido (34/34 pruebas aprobadas) |
+| D-09 | La exportación a Excel genera un CSV separado por comas. En Excel con configuración regional en español (separador `;`) todo el reporte queda en la columna A. Corrección sugerida: usar `fputcsv(..., ';')`, agregar la línea `sep=,` al inicio o exportar `.xlsx`. | Media | #2 | Abierto |
 | D-07 | El commit `8bf0215` subió la carpeta `Claude outputs/` con 3 PDF duplicados de evidencias de la Fase 2. | Baja | #6 | Corregido (se elimina del repositorio y se agrega a `.gitignore`) |
 
 ## 3. Correcciones respecto al Sprint II
