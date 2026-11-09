@@ -15,8 +15,8 @@ Cada caso se ejecuta en localhost (XAMPP + `php artisan serve`) con los usuarios
 
 | ID | Módulo | Caso de prueba | Rol | Resultado esperado | Resultado | Defecto |
 |---|---|---|---|---|---|---|
-| P3-01 | Autenticación | Iniciar sesión con credenciales válidas | Admin, Recepción, Paciente | Entra y redirige al panel de su rol | Pendiente | |
-| P3-02 | Autenticación | Iniciar sesión con contraseña incorrecta | Cualquiera | Mensaje de error, no entra | Pendiente | |
+| P3-01 | Autenticación | Iniciar sesión con credenciales válidas | Admin, Recepción, Paciente | Entra y redirige al panel de su rol | Aprobada (automatizada) | |
+| P3-02 | Autenticación | Iniciar sesión con contraseña incorrecta | Cualquiera | Mensaje de error, no entra | Aprobada (automatizada) | |
 | P3-03 | Roles | Paciente intenta abrir `/reportes`, `/doctores` o `/usuarios` | Paciente | 403 (acceso denegado) | Pendiente | |
 | P3-04 | Roles | Recepción intenta abrir `/reportes` | Recepción | 403 | Pendiente | |
 | P3-05 | Pacientes | Registrar paciente con datos válidos | Admin, Recepción | Se guarda y muestra mensaje de éxito | Pendiente | |
@@ -42,11 +42,11 @@ Cada caso se ejecuta en localhost (XAMPP + `php artisan serve`) con los usuarios
 | P3-25 | Navegación | Acceder a Reportes y Documentos desde el menú | Admin, Recepción | Enlaces visibles según rol | Fallida | D-03 |
 | P3-26 | Interfaz | Revisar vistas en escritorio y móvil (390 px) | Todos | Diseño adaptable, sin desbordes | Pendiente | |
 | P3-27 | Compatibilidad | Repetir el flujo principal en Chrome y Edge | Todos | Mismo comportamiento | Pendiente | |
-| P3-28 | Automatizadas | `php artisan test` | — | Todas las pruebas en verde | Pendiente | |
+| P3-28 | Automatizadas | `php artisan test` | — | Todas las pruebas en verde | Aprobada (34/34, 99 aserciones) | D-08 |
 
 ## 2. Registro de defectos
 
-Encontrados por revisión de código de la rama `main` el 8/11/2026.
+Encontrados por revisión de código de la rama `main` y por la ejecución de `php artisan test` el 8/11/2026.
 
 | ID | Descripción | Prioridad | Responsable | Estado |
 |---|---|---|---|---|
@@ -56,6 +56,7 @@ Encontrados por revisión de código de la rama `main` el 8/11/2026.
 | D-04 | Permisos inconsistentes al eliminar documentos: la ruta permite admin y recepción, pero el controlador solo permite admin (recepción recibe 403). | Media | #2 | Abierto |
 | D-05 | `ReportController` repite consultas en lugar de usar `ReporteService` (#3), que ya calcula más métricas (por especialidad, pacientes frecuentes, % completadas). | Baja | #2 / #3 | Abierto |
 | D-06 | El teléfono del paciente solo valida longitud (`max:30`); no aplica un formato (por ejemplo, la expresión regular `^[267]\d{3}-?\d{4}$` para El Salvador). | Media | #2 | Abierto |
+| D-08 | Primera ejecución de `php artisan test`: 16 de 34 pruebas fallaban. Causa: `UserFactory` no definía `is_active` ni `rol`, y `EnsureActiveUser` cerraba la sesión de los usuarios de prueba (302 a /login). Además, `ExampleTest` esperaba 200 en `/` (la raíz redirige al login) y `RegistrationTest` no enviaba `consentimiento`. | Alta | #6 | Corregido (34/34 pruebas aprobadas) |
 | D-07 | El commit `8bf0215` subió la carpeta `Claude outputs/` con 3 PDF duplicados de evidencias de la Fase 2. | Baja | #6 | Corregido (se elimina del repositorio y se agrega a `.gitignore`) |
 
 ## 3. Correcciones respecto al Sprint II
@@ -67,3 +68,4 @@ Encontrados por revisión de código de la rama `main` el 8/11/2026.
 | Faltaban índices para consultas de reportes | Índices en `fecha`, `status` y (`doctor_id`, `fecha`) | `2af8f02` |
 | Directorios de almacenamiento sin configurar | Carpetas de `storage` para archivos subidos | `8bbefd0` |
 | Descarga de documentos devolvía error 500 si no existía | Responde 404 y valida el acceso por identificador del paciente | `8660bb1` |
+| Pruebas automatizadas desactualizadas (16 fallaban) | Factory con `rol` e `is_active`; pruebas de inicio y registro alineadas con las reglas actuales | Fase 3, Integrante #6 |

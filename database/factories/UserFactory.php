@@ -29,6 +29,10 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Mismos valores por defecto que la base de datos: sin ellos el modelo en memoria
+            // queda con is_active = null y EnsureActiveUser cierra la sesión en las pruebas.
+            'rol' => 'paciente',
+            'is_active' => true,
         ];
     }
 

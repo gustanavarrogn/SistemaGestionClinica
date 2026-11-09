@@ -14,6 +14,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // La raíz redirige al login cuando no hay sesión.
+        $response->assertRedirect(route('login'));
     }
 }
