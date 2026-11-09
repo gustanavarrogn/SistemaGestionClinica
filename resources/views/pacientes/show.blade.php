@@ -2,7 +2,7 @@
 @section('title', 'Ficha del paciente')
 @section('content')
 <div class="mc-page-head"><div><span class="mc-eyebrow">Pacientes / Ficha #{{ $paciente->paciente_id }}</span><h1 class="mc-page-title">{{ $paciente->nombre }}</h1><p class="mc-muted mb-0">Información de identificación y contacto.</p></div>
-<div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-secondary" href="{{ route('pacientes.index') }}">Volver al listado</a><a class="btn btn-primary" href="{{ route('pacientes.edit', $paciente->paciente_id) }}">Editar ficha</a></div></div>
+<div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-secondary" href="{{ route('pacientes.index') }}">Volver al listado</a><a class="btn btn-primary" href="{{ route('pacientes.edit', $paciente->paciente_id) }}">Editar ficha</a><a class="btn btn-outline-primary" href="{{ route('documentos.index', $paciente->paciente_id) }}">Ver documentos</a></div></div>
 <div class="mc-card mb-4"><div class="mc-card-head"><h2 class="mc-small-title mb-0">Datos personales</h2></div><div class="mc-card-body"><dl class="row g-3 mb-0">
     <div class="col-md-6"><div class="mc-info-tile"><dt>Nombre completo</dt><dd>{{ $paciente->nombre }}</dd></div></div>
     <div class="col-md-6"><div class="mc-info-tile"><dt>Teléfono</dt><dd>{{ $paciente->telefono ?: 'No registrado' }}</dd></div></div>

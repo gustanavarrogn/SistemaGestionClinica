@@ -1,0 +1,20 @@
+/* Integrante 5 — Fase 3. Estilos complementarios, sin modificar medicontrol.css */
+.mc-f3-card { overflow: hidden; }
+.mc-f3-card .mc-card-head { padding: 1.1rem 1.35rem; }
+.mc-f3-card .mc-card-body { padding: 1.35rem; }
+.mc-f3-count { font-size: .8rem; font-weight: 700; color: #38678e; background: #eaf4fe; padding: .32rem .75rem; border-radius: 999px; }
+.mc-f3-table th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: #5d7087; white-space: nowrap; }
+.mc-f3-table td { vertical-align: middle; }
+.mc-f3-filename { min-width: 190px; max-width: 340px; overflow-wrap: anywhere; font-weight: 600; }
+.mc-f3-file-icon { display: inline-flex; justify-content: center; align-items: center; width: 36px; height: 34px; margin-right: .3rem; background: #e8f2ff; color: #2563eb; border-radius: 8px; font-size: .65rem; letter-spacing: .02em; font-weight: 800; }
+.mc-f3-tag { padding: .3rem .65rem; background: #eef6fa; border-radius: 999px; color: #315d74; font-weight: 600; font-size: .8rem; }
+.mc-f3-stat { height: 100%; padding: 1.35rem; background: #fff; border: 1px solid #dbe6f1; box-shadow: 0 8px 28px rgba(23,60,98,.04); border-radius: 16px; }
+.mc-f3-stat-icon { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; justify-content: center; align-items: center; background: #eaf2fe; color: #2861bb; font-size: .76rem; font-weight: 800; margin-bottom: .75rem; }
+.mc-f3-stat-icon.mc-f3-stat-warn { background: #fff4e3; color: #a96505; }
+.mc-f3-stat-icon.mc-f3-stat-good { background: #e7faf2; color: #14825b; }
+.mc-f3-stat p { margin: 0 0 .2rem; color: #526a80; font-weight: 600; }
+.mc-f3-stat strong { display: block; font-size: clamp(1.75rem, 3vw, 2.35rem); line-height: 1.2; color: #153454; letter-spacing: -.04em; }
+.mc-f3-stat small { color: #798da1; font-size: .8rem; }
+.mc-f3-chart { position: relative; height: 290px; min-height: 230px; }
+.mc-f3-chart-wide { height: 310px; }
+@media (max-width: 575px) { .mc-f3-card .mc-card-body { padding: 1rem; } .mc-f3-chart, .mc-f3-chart-wide { height: 240px; } .mc-f3-filename { min-width: 160px; } }
