@@ -7,6 +7,7 @@
     <title>@yield('title', 'MediControl') | MediControl</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ asset('css/medicontrol.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 <body>
     {{-- Esta plantilla mantiene el mismo encabezado en todas las pantallas. --}}
@@ -37,6 +38,9 @@
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('pacientes.*') ? 'active' : '' }}" href="{{ route('pacientes.index') }}">Pacientes</a></li>
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('citas.*') ? 'active' : '' }}" href="{{ route('citas.index') }}">Citas</a></li>
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('recepcionista.agenda') ? 'active' : '' }}" href="{{ route('recepcionista.agenda') }}">Agenda del día</a></li>
+                            @if(auth()->user()->rol === 'admin')
+                            <li class="nav-item"><a class="nav-link {{ request()->routeIs('reportes.*') ? 'active' : '' }}" href="{{ route('reportes.index') }}">Reportes</a></li>
+                            @endif
                             @if(auth()->user()->isManagementAdmin())
                                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('doctores.*') ? 'active' : '' }}" href="{{ route('doctores.index') }}">Doctores</a></li>
                                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">Usuarios y roles</a></li>

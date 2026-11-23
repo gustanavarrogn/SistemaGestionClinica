@@ -7,7 +7,12 @@
         <h1 class="mc-page-title">Mis citas</h1>
         <p class="mc-muted mb-0">Consulta el estado de tus citas médicas.</p>
     </div>
-    <a class="btn btn-primary" href="{{ route('citas.create') }}">+ Solicitar cita</a>
+    <div class="d-flex flex-wrap gap-2">
+        @if($paciente)
+            <a class="btn btn-outline-primary" href="{{ route('documentos.index', $paciente->paciente_id) }}">Mis documentos</a>
+        @endif
+        <a class="btn btn-primary" href="{{ route('citas.create') }}">+ Solicitar cita</a>
+    </div>
 </div>
 
 @if(!$paciente)

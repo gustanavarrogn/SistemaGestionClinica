@@ -1,6 +1,12 @@
 # MediControl – Sistema de Gestión de Citas Médicas
 
-Aplicación web para gestionar pacientes, personal médico y citas de una clínica. Proyecto de la asignatura **DWS901 – Desarrollo de Aplicaciones Web con Software Interpretado en el Servidor**, Fase 2 (núcleo del Back-End).
+Aplicación web para gestionar pacientes, personal médico y citas de una clínica. Proyecto de la asignatura **DWS901 – Desarrollo de Aplicaciones Web con Software Interpretado en el Servidor**, Fase 3 (Sprint III): integración Full Stack y **Release Candidate `v0.3.0-rc1`**.
+
+| Recurso | Enlace |
+|---|---|
+| Repositorio | https://github.com/gustanavarrogn/SistemaGestionClinica |
+| Product Backlog (Trello) | https://trello.com/b/kXrIX13f/dws901-medi-control |
+| Matriz de pruebas y registro de defectos (Fase 3) | [docs/PRUEBAS_FASE3.md](docs/PRUEBAS_FASE3.md) |
 
 ## Tecnologías
 
@@ -10,6 +16,8 @@ Aplicación web para gestionar pacientes, personal médico y citas de una clíni
 | Base de datos | MySQL / MariaDB (XAMPP) |
 | Autenticación | Laravel Breeze |
 | Vistas | Blade + Tailwind CSS, compilado con Vite |
+| Reportes | Laravel DomPDF (PDF) y exportación CSV compatible con Excel |
+| Archivos | Laravel Storage (disco `local`, carpeta `storage/app/documentos`) |
 | Control de versiones | Git / GitHub |
 
 ## Equipo y responsabilidades
@@ -155,6 +163,10 @@ El seeder también crea dos doctoras (Dra. Valeria Rivas y Dra. Elena Morales) y
 | Agenda del día / cambiar estado de citas | ✅ | ✅ | — |
 | Agendar citas | ✅ | ✅ | ✅ (solicitud) |
 | Mis citas / cancelar su cita | — | — | ✅ |
+| Documentos: subir | ✅ | ✅ | — |
+| Documentos: ver y descargar | ✅ | ✅ | ✅ (solo los suyos) |
+| Documentos: eliminar | ✅ | — | — |
+| Reportes, gráficos y exportación PDF/Excel | ✅ | — | — |
 
 Las rutas están protegidas con el middleware `role`. Si un usuario intenta entrar a una sección sin permiso, recibe **403 – No tiene permiso para acceder a esta sección**.
 
@@ -172,6 +184,20 @@ Las rutas están protegidas con el middleware `role`. Si un usuario intenta entr
 - El paciente ve el estado de sus citas actualizado automáticamente cada 25 segundos.
 - El registro público crea la cuenta **y** la ficha de paciente.
 
+## 6.1 Módulos agregados en la Fase 3
+
+### Documentos clínicos
+- Ruta: `/pacientes/{id}/documentos`. Se suben recetas, exámenes u otros documentos de un paciente (opcionalmente ligados a una cita).
+- Validación: obligatorio, solo **PDF, JPG o PNG**, máximo **5 MB**, tipo `receta`, `examen` u `otro`. Mensajes en español.
+- Los archivos se guardan con nombre único en `storage/app/documentos` y la referencia (nombre original, ruta, tipo MIME, peso, quién lo subió) en la tabla `documentos`.
+- La descarga verifica que un paciente solo acceda a sus propios documentos (403) y responde 404 si el documento o el archivo no existen.
+
+### Reportes
+- Ruta: `/reportes` (solo administrador), con filtro por rango de fechas (por defecto, el mes actual).
+- Indicadores: total de citas, citas por estado, por doctora y por mes, citas sin asistencia y **tasa de inasistencia**.
+- Exportación: `/reportes/pdf` (PDF con DomPDF) y `/reportes/excel` (CSV con BOM UTF-8 que abre en Excel con acentos).
+- `app/Services/ReporteService.php` contiene consultas adicionales (por especialidad, pacientes frecuentes, por día y hora).
+
 ## 7. Pruebas
 
 ### Pruebas automatizadas
@@ -188,6 +214,10 @@ Las pruebas usan una base SQLite en memoria (no tocan `medicontrol`). Requieren 
 
 Se ejecutaron 29 casos de prueba sobre login, roles, gestión de pacientes, CRUD de doctores, reglas de agenda y registro. Resultados y evidencias en el documento PDF de entrega.
 
+### Pruebas de integración (Fase 3)
+
+La matriz de 28 casos (autenticación, roles, CRUD, citas, documentos, reportes, exportaciones, navegación, diseño adaptable y navegadores) y el registro de defectos con prioridad, responsable y estado están en [docs/PRUEBAS_FASE3.md](docs/PRUEBAS_FASE3.md).
+
 ## 8. Solución de problemas
 
 | Error | Solución |
@@ -203,10 +233,11 @@ Se ejecutaron 29 casos de prueba sobre login, roles, gestión de pacientes, CRUD
 ## 9. Estructura principal
 
 ```
-app/Http/Controllers/   Controladores (citas, pacientes, doctores, usuarios, auth)
+app/Http/Controllers/   Controladores (citas, pacientes, doctores, usuarios, documentos, reportes, auth)
 app/Http/Middleware/    RoleMiddleware y EnsureActiveUser
-app/Models/             User, Patient, Doctor, Appointment
-database/migrations/    Tablas users, patients, doctors, appointments y ajustes
+app/Models/             User, Patient, Doctor, Appointment, Documento
+app/Services/           ReporteService (consultas para reportes)
+database/migrations/    Tablas users, patients, doctors, appointments, documentos, índices y ajustes
 database/seeders/       Datos de prueba
 resources/views/        Vistas Blade por módulo
 routes/web.php          Rutas protegidas por rol
@@ -214,6 +245,9 @@ tests/Feature/          Pruebas automatizadas
 ```
 
 ## 10. Limitaciones conocidas y pendientes
+
+- Los defectos abiertos del Sprint III (vistas de reportes y documentos, gráficos, enlaces del menú y formato del teléfono) se listan en [docs/PRUEBAS_FASE3.md](docs/PRUEBAS_FASE3.md#2-registro-de-defectos).
+- La exportación "Excel" genera un archivo CSV; para un .xlsx con formato se puede usar `maatwebsite/excel` en el Sprint IV.
 
 - Algunos mensajes del sistema (por ejemplo, el error de inicio de sesión) aparecen en inglés porque `APP_LOCALE=en`.
 - El botón "Eliminar" de doctores realiza una **desactivación** (soft delete) para conservar el historial.
