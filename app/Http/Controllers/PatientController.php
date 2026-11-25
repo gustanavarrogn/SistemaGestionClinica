@@ -8,6 +8,12 @@ use App\Models\User;
 
 class PatientController extends Controller
 {
+    // Telefono de El Salvador: 8 digitos, con guion opcional despues del cuarto.
+    // Acepta 7000-1234 y 70001234.
+    const REGLA_TELEFONO = 'regex:/^[0-9]{4}-?[0-9]{4}$/';
+
+    const MENSAJE_TELEFONO = 'El teléfono debe tener 8 dígitos, por ejemplo 7000-1234.';
+
     public function index(Request $request)
     {
         $buscar = $request->input('buscar');
@@ -33,7 +39,7 @@ class PatientController extends Controller
     {
         $datos = $request->validate([
             'nombre'                => 'required|string|max:120',
-            'telefono'              => 'nullable|string|max:30',
+            'telefono'              => ['nullable', 'string', self::REGLA_TELEFONO],
             'email'                 => 'nullable|email|max:255|unique:patients,email',
             'birth_date'            => 'nullable|date|before:today',
             'tipo_de_sangre'        => 'nullable|string|max:3',
@@ -41,6 +47,7 @@ class PatientController extends Controller
             'enfermedades_cronicas' => 'nullable|string',
         ], [
             'nombre.required'   => 'El nombre del paciente es obligatorio.',
+            'telefono.regex'    => self::MENSAJE_TELEFONO,
             'birth_date.before' => 'La fecha de nacimiento no puede ser futura.',
             'email.email'       => 'El correo no tiene un formato valido.',
         ]);
@@ -85,9 +92,16 @@ class PatientController extends Controller
 
         $reglas = [
             'nombre'     => 'required|string|max:120',
-            'telefono'   => 'nullable|string|max:30',
+            'telefono'   => ['nullable', 'string', self::REGLA_TELEFONO],
             'email'      => 'nullable|email|max:255|unique:patients,email,'.$id.',paciente_id',
             'birth_date' => 'nullable|date|before:today',
+        ];
+
+        $mensajes = [
+            'nombre.required'   => 'El nombre del paciente es obligatorio.',
+            'telefono.regex'    => self::MENSAJE_TELEFONO,
+            'birth_date.before' => 'La fecha de nacimiento no puede ser futura.',
+            'email.email'       => 'El correo no tiene un formato valido.',
         ];
 
         if (auth()->user()->isManagementAdmin()) {
@@ -96,7 +110,7 @@ class PatientController extends Controller
             $reglas['enfermedades_cronicas'] = 'nullable|string';
         }
 
-        $paciente->update($request->validate($reglas));
+        $paciente->update($request->validate($reglas, $mensajes));
 
         return redirect()->route('pacientes.show', $id)
                          ->with('exito', 'Datos del paciente actualizados.');

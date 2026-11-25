@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    // Separador de columnas del CSV.
+    // Excel en espanol espera punto y coma; con coma mete todo en una sola columna.
+    const SEPARADOR_CSV = ';';
+
     public function index(Request $request)
     {
         $datos = $this->reunirDatos($request);
@@ -39,37 +43,38 @@ class ReportController extends Controller
 
         $salida = function () use ($datos) {
             $archivo = fopen('php://output', 'w');
+            $sep     = self::SEPARADOR_CSV;
 
             fwrite($archivo, "\xEF\xBB\xBF");
 
-            fputcsv($archivo, ['Reporte MediControl']);
-            fputcsv($archivo, ['Periodo', $datos['desde'].' al '.$datos['hasta']]);
+            fputcsv($archivo, ['Reporte MediControl'], $sep);
+            fputcsv($archivo, ['Periodo', $datos['desde'].' al '.$datos['hasta']], $sep);
 
-            fputcsv($archivo, []);
-            fputcsv($archivo, ['Resumen']);
-            fputcsv($archivo, ['Total de citas', $datos['totalCitas']]);
-            fputcsv($archivo, ['Citas sin asistencia', $datos['noAsistio']]);
-            fputcsv($archivo, ['Tasa de inasistencia', $datos['tasaInasistencia'].'%']);
+            fputcsv($archivo, [], $sep);
+            fputcsv($archivo, ['Resumen'], $sep);
+            fputcsv($archivo, ['Total de citas', $datos['totalCitas']], $sep);
+            fputcsv($archivo, ['Citas sin asistencia', $datos['noAsistio']], $sep);
+            fputcsv($archivo, ['Tasa de inasistencia', $datos['tasaInasistencia'].'%'], $sep);
 
-            fputcsv($archivo, []);
-            fputcsv($archivo, ['Citas por estado']);
-            fputcsv($archivo, ['Estado', 'Cantidad']);
+            fputcsv($archivo, [], $sep);
+            fputcsv($archivo, ['Citas por estado'], $sep);
+            fputcsv($archivo, ['Estado', 'Cantidad'], $sep);
             foreach ($datos['porEstado'] as $fila) {
-                fputcsv($archivo, [$fila->status, $fila->total]);
+                fputcsv($archivo, [$fila->status, $fila->total], $sep);
             }
 
-            fputcsv($archivo, []);
-            fputcsv($archivo, ['Citas por doctora']);
-            fputcsv($archivo, ['Doctora', 'Cantidad']);
+            fputcsv($archivo, [], $sep);
+            fputcsv($archivo, ['Citas por doctora'], $sep);
+            fputcsv($archivo, ['Doctora', 'Cantidad'], $sep);
             foreach ($datos['porDoctora'] as $fila) {
-                fputcsv($archivo, [$fila->nombre, $fila->total]);
+                fputcsv($archivo, [$fila->nombre, $fila->total], $sep);
             }
 
-            fputcsv($archivo, []);
-            fputcsv($archivo, ['Citas por mes']);
-            fputcsv($archivo, ['Mes', 'Cantidad']);
+            fputcsv($archivo, [], $sep);
+            fputcsv($archivo, ['Citas por mes'], $sep);
+            fputcsv($archivo, ['Mes', 'Cantidad'], $sep);
             foreach ($datos['porMes'] as $fila) {
-                fputcsv($archivo, [$fila->mes, $fila->total]);
+                fputcsv($archivo, [$fila->mes, $fila->total], $sep);
             }
 
             fclose($archivo);
